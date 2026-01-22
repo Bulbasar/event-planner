@@ -11,7 +11,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key")
 DEBUG = os.getenv("DEBUG", "True") == "True"
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")
+
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SECURE_SSL_REDIRECT = not DEBUG
+
+
 
 # -------------------------
 # JWT SETTINGS
@@ -53,8 +59,17 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 # -------------------------
 # CORS (React frontend)
 # -------------------------
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "https://event-planner-frontend.onrender.com",
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://event-planner-frontend.onrender.com",
+]
 
 # -------------------------
 # Installed apps and middleware
