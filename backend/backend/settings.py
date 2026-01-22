@@ -15,8 +15,7 @@ DEBUG = os.getenv("DEBUG", "True") == "True"
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-SECURE_SSL_REDIRECT = not DEBUG
-
+SECURE_SSL_REDIRECT = False  # IMPORTANT on Render
 
 
 # -------------------------
@@ -96,6 +95,12 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_BROWSER_XSS_FILTER = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
 
 # -------------------------
 # Templates
