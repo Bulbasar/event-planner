@@ -9,14 +9,24 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# -------------------------
+# SECRET & DEBUG
+# -------------------------
 SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key")
 DEBUG = os.getenv("DEBUG", "True") == "True"
 
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
+# ALLOWED_HOSTS from comma-separated string
+ALLOWED_HOSTS = [host.strip() for host in os.getenv("ALLOWED_HOSTS", "").split(",") if host.strip()]
 
+# -------------------------
+# SSL / Proxy
+# -------------------------
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-SECURE_SSL_REDIRECT = False  # IMPORTANT on Render
-
+SECURE_SSL_REDIRECT = False  # Keep False on Render free plan
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_BROWSER_XSS_FILTER = True
 
 # -------------------------
 # JWT SETTINGS
@@ -31,22 +41,15 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(
-        minutes=int(os.getenv("ACCESS_TOKEN_LIFETIME_MINUTES", 30))
-    ),
-    "REFRESH_TOKEN_LIFETIME": timedelta(
-        days=int(os.getenv("REFRESH_TOKEN_LIFETIME_DAYS", 1))
-    ),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=int(os.getenv("ACCESS_TOKEN_LIFETIME_MINUTES", 30))),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=int(os.getenv("REFRESH_TOKEN_LIFETIME_DAYS", 1))),
 }
 
 # -------------------------
 # DATABASE
 # -------------------------
 DATABASES = {
-    "default": dj_database_url.config(
-        default=os.getenv("DATABASE_URL"),
-        conn_max_age=600,
-    )
+    "default": dj_database_url.config(default=os.getenv("DATABASE_URL"), conn_max_age=600)
 }
 
 # -------------------------
@@ -56,22 +59,20 @@ STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # -------------------------
-# CORS (React frontend)
+# CORS
 # -------------------------
 CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOW_CREDENTIALS = True
-
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "https://event-planner-frontend.onrender.com",
 ]
-
 CSRF_TRUSTED_ORIGINS = [
     "https://event-planner-frontend.onrender.com",
 ]
 
 # -------------------------
-# Installed apps and middleware
+# Installed apps & middleware
 # -------------------------
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -96,21 +97,13 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-SECURE_CONTENT_TYPE_NOSNIFF = True
-SECURE_BROWSER_XSS_FILTER = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
-
-
 # -------------------------
 # Templates
 # -------------------------
-ROOT_URLCONF = "backend.urls"
-
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "frontend/dist"],  # React build output
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -122,6 +115,7 @@ TEMPLATES = [
     }
 ]
 
+ROOT_URLCONF = "backend.urls"
 WSGI_APPLICATION = "backend.wsgi.application"
 
 # -------------------------
@@ -131,11 +125,10 @@ LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
-
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # -------------------------
-# Password validation
+# Password validators
 # -------------------------
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
